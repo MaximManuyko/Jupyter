@@ -64,15 +64,16 @@
 # ________________________________________________________________
 # 
 
-# In[116]:
+# In[145]:
 
 
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 
-# In[117]:
+# In[146]:
 
 
 # переменные для размеров графиков
@@ -80,24 +81,24 @@ import matplotlib.pyplot as plt
 a = 20
 
 
-# In[118]:
+# In[147]:
 
 
 # Загрузка данных из CSV файла в датафрейм
-file_path = "/Users/maxim_manuyko/Documents/GitHub/Jupiter/1_Данные_о_численности_населения_мира.csv"
-world_population_data = pd.read_csv(file_path)
+file_path = '/Users/maxim_manuyko/Documents/GitHub/Jupiter/1_Данные_о_численности_населения_мира.csv'
 
+world_population_data = pd.read_csv(file_path)
 
 world_population_data.head(1000000)
 
 
-# In[119]:
+# In[148]:
 
 
 world_population_data.describe()
 
 
-# In[120]:
+# In[149]:
 
 
 world_population_data_copy = world_population_data.copy(deep=True)
@@ -115,7 +116,9 @@ plt.title('Тепловая карта корреляции')
 plt.show()
 
 
-# In[121]:
+# Прослеживается зависимость размера популяции и процент населения от площади страны.
+
+# In[150]:
 
 
 x_columns = ['2023 population', '2022 population', '2020 population', '2015 population', '2010 population', '2000 population', '1990 population', '1980 population', '1970 population']
@@ -128,9 +131,17 @@ y_columns = y_columns[::-1]
 # Создайте новый датафрейм с суммарными значениями по выбранным колонкам
 sum_df = world_population_data[y_columns].sum()
 
+# Конвертируйте значения в миллионы
+sum_df = sum_df / 1e6
+
 # Постройте линейный график
 plt.figure(figsize=(a, a * 0.3))
 plt.plot(x_columns, sum_df, marker='o', linestyle='-', color='b')
+
+# Добавление значений над точками
+for x, y in zip(x_columns, sum_df):
+    plt.text(x, y, f'{y:.2f} млн.', ha='center', va='bottom')
+
 plt.title('Суммарная популяция по годам')
 plt.xlabel('Год')
 plt.ylabel('Суммарная популяция, млн. чел.')
@@ -138,7 +149,7 @@ plt.grid(True)
 plt.show()
 
 
-# In[122]:
+# In[151]:
 
 
 # Установка размера графика
@@ -163,7 +174,7 @@ plt.ylabel('Страна')
 plt.show()
 
 
-# In[123]:
+# In[152]:
 
 
 # Установка размера графика
@@ -188,7 +199,7 @@ plt.ylabel('Страна')
 plt.show()
 
 
-# In[124]:
+# In[153]:
 
 
 # Группировка данных по континентам и суммирование населения для 2023 года
@@ -209,7 +220,7 @@ plt.title('Распределение населения по континент
 plt.show()
 
 
-# In[125]:
+# In[154]:
 
 
 # Выбираем первые 10 стран
@@ -239,7 +250,7 @@ plt.xticks(rotation=45)  # Поворот названий годов для л�
 plt.show()
 
 
-# In[126]:
+# In[155]:
 
 
 # Создаем DataFrame down_Population
@@ -258,7 +269,7 @@ down_Population = down_Population[down_Population['down_Population'] <= 0]
 down_Population.head(1000000)
 
 
-# In[127]:
+# In[156]:
 
 
 # Создаем DataFrame down_Population
@@ -306,7 +317,7 @@ for country in down_Population['country'].unique():
     plt.show()
 
 
-# In[128]:
+# In[157]:
 
 
 # Сортировка по убыванию density (km²)
@@ -341,7 +352,7 @@ for bar in bars_bottom:
 plt.show()
 
 
-# In[129]:
+# In[158]:
 
 
 continent_metriks = world_population_data.copy(deep=True)
@@ -359,7 +370,7 @@ pivot_table = pivot_table.sort_values(by='2023 population', ascending=True)
 pivot_table.head(1000000)
 
 
-# In[132]:
+# In[159]:
 
 
 # Сортируем DataFrame по каждому столбцу
@@ -414,4 +425,26 @@ plt.grid(axis='x', linestyle='--', alpha=0.6)
 
 plt.tight_layout()
 plt.show()
+
+
+# In[160]:
+
+
+fig = px.choropleth(
+    world_population_data,
+    locations="cca3",
+    color="2023 population",
+    hover_name="country",
+    color_continuous_scale="RdYlGn",  # Красно-зелёная цветовая схема
+    #color_continuous_scale=px.colors.sequential.Plasma,
+    title="Численность населения по странам в 2023 году",
+    labels={"2023 population": "Население 2023"},
+    projection="natural earth"
+)
+
+# Увеличение размера карты
+fig.update_layout(width=2000, height=1000)
+
+# Отображение карты
+fig.show()
 
