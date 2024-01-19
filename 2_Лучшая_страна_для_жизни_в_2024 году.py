@@ -9,7 +9,6 @@
 # 
 # **О наборе данных**
 # Этот набор данных содержит данные разных стран. Этот набор данных о лучшей стране для жизни в 2024 году. Этот набор данных лучше всего подходит для исследовательского анализа данных.
-# Если вам нравится этот набор данных, пожалуйста, проголосуйте за него.
 # 
 # **population_2024**         -  Общая численность населения в 2024 году
 # 
@@ -35,15 +34,17 @@
 # 
 # **WorldHappiness2022**      -  Индекс счастья
 
-# In[187]:
+# In[20]:
 
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
+import seaborn as sns
+import os
 
 
-# In[188]:
+# In[2]:
 
 
 #Переменные
@@ -55,21 +56,24 @@ a = 1000000
 b = 20
 
 
-# In[189]:
+# In[3]:
 
+# Определение текущей директории, где находится файл с кодом
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Формирование абсолютного пути к файлу CSV в текущей директории
+csv_file_path = os.path.join(current_directory, '2_Лучшая_страна_для_жизни_в_2024 году.csv')
 
 # Загрузка CSV-файла в датафрейм
+input_raw = pd.read_csv(csv_file_path)
 
-file_path = '/Users/maxim_manuyko/Documents/GitHub/Jupiter/2_Лучшая_страна_для_жизни_в_2024 году.csv'
-
-input_raw = pd.read_csv(file_path)
-# In[190]:
+# In[4]:
 
 
 print(input_raw.dtypes)
 
 
-# In[191]:
+# In[5]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -97,7 +101,7 @@ for bar in bars:
 plt.show()
 
 
-# In[192]:
+# In[6]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -125,7 +129,7 @@ for bar in bars:
 plt.show()
 
 
-# In[193]:
+# In[7]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -153,7 +157,7 @@ for bar in bars:
 plt.show()
 
 
-# In[194]:
+# In[8]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -183,7 +187,7 @@ plt.show()
 
 # Страны которые не входят в ООО
 
-# In[195]:
+# In[9]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -209,7 +213,7 @@ non_un_members_table = non_un_members[[
 non_un_members_table
 
 
-# In[196]:
+# In[10]:
 
 
 # Создайте копию датафрейма
@@ -236,7 +240,7 @@ for bar in bars:
 plt.show()
 
 
-# In[197]:
+# In[11]:
 
 
 # Создайте копию датафрейма
@@ -263,7 +267,7 @@ for bar in bars:
 plt.show()
 
 
-# In[198]:
+# In[12]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -292,7 +296,7 @@ for bar in bars:
 plt.show()
 
 
-# In[199]:
+# In[13]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -320,7 +324,7 @@ for bar in bars:
 plt.show()
 
 
-# In[200]:
+# In[14]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -346,7 +350,7 @@ for bar, value in zip(bars, top_countries['Hdi2021']):
 plt.show()
 
 
-# In[201]:
+# In[15]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -371,7 +375,7 @@ for bar, value in zip(bars, top_countries['Hdi2021']):
 plt.show()
 
 
-# In[202]:
+# In[16]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -400,7 +404,7 @@ for bar in bars:
 plt.show()
 
 
-# In[203]:
+# In[17]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -429,7 +433,40 @@ for bar in bars:
 plt.show()
 
 
-# In[204]:
+# In[22]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Создаем подмножество DataFrame с нужными столбцами
+selected_columns = ['population_2024', 'population_growthRate', 'land_area',
+                    'population_density', 'population_densityMi', 'Hdi2021', 'Hdi2020', 'WorldHappiness2022']
+
+subset_df = input_raw_copy[selected_columns]
+
+# Создаем тепловую карту корреляции
+correlation_matrix = subset_df.corr()
+
+# Настраиваем размер фигуры
+plt.figure(figsize=(b, b))
+
+# Рисуем тепловую карту с использованием seaborn
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+
+# Настраиваем заголовок
+plt.title('Тепловая карта корреляции')
+
+# Показываем график
+plt.show()
+
+
+# Вывод: 
+# 
+# Есть небольшая зависимость популяции населения от площади страны.
+# 
+# <span style="color:red">Рост популяции зависит обратно от индекса развития и индекса счастья, чем ниже индекс развития и индекс счастья, тем выше рост популяции.</span>
+
+# In[18]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
