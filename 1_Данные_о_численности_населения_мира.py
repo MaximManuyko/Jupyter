@@ -64,16 +64,18 @@
 # ________________________________________________________________
 # 
 
-# In[145]:
+# In[61]:
 
 
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
+from matplotlib.ticker import MultipleLocator
+import os
 
 
-# In[146]:
+# In[62]:
 
 
 # переменные для размеров графиков
@@ -81,24 +83,26 @@ import plotly.express as px
 a = 20
 
 
-# In[147]:
+# In[63]:
+# Получаем путь к текущей директории, где находится Python-скрипт
+current_directory = os.path.dirname(os.path.realpath(__file__))
 
+# Укажите имя файла
+csv_filename = "1_Данные_о_численности_населения_мира.csv"
 
-# Загрузка данных из CSV файла в датафрейм
-file_path = '/Users/maxim_manuyko/Documents/GitHub/Jupiter/1_Данные_о_численности_населения_мира.csv'
+# Соберите полный путь к файлу CSV
+csv_path = os.path.join(current_directory, csv_filename)
 
-world_population_data = pd.read_csv(file_path)
+# Загрузите данные из CSV файла в DataFrame
+world_population_data = pd.read_csv(csv_path)
 
-world_population_data.head(1000000)
-
-
-# In[148]:
+# In[64]:
 
 
 world_population_data.describe()
 
 
-# In[149]:
+# In[65]:
 
 
 world_population_data_copy = world_population_data.copy(deep=True)
@@ -116,9 +120,49 @@ plt.title('Тепловая карта корреляции')
 plt.show()
 
 
-# Прослеживается зависимость размера популяции и процент населения от площади страны.
+# Прослеживается зависимость размера популяции и процента населения от площади страны.
 
-# In[150]:
+# In[66]:
+
+
+#world_population_data.dtypes
+
+
+# In[67]:
+
+
+world_population_data_copy = world_population_data.copy(deep = True)
+
+plt.figure(figsize=(a, a * 0.3))
+plt.scatter(world_population_data_copy['2023 population'], range(len(world_population_data_copy)))
+plt.title('Распределение популяции в 2023')
+plt.xlabel('Популяция 2023, млрд. чел.')
+plt.ylabel('Количество стран')
+plt.grid(True)
+plt.gca().xaxis.set_major_locator(MultipleLocator(100000000))
+plt.show()
+
+
+# В большинстве стран популяция меньше 100 млн. человек. 
+
+# In[68]:
+
+
+world_population_data_copy = world_population_data.copy(deep = True)
+
+plt.figure(figsize=(a, a * 0.3))
+plt.scatter(world_population_data_copy['density (km²)'], range(len(world_population_data_copy)))
+plt.title('Распределение плотности населения по странам')
+plt.xlabel('Плотность населения, чел. на кв. км.')
+plt.ylabel('Количество стран')
+plt.grid(True)
+#plt.gca().xaxis.set_major_locator(MultipleLocator(100000000))
+plt.show()
+
+
+# Средняя плотность населения 450 чел. на кв. км. 
+
+# In[69]:
 
 
 x_columns = ['2023 population', '2022 population', '2020 population', '2015 population', '2010 population', '2000 population', '1990 population', '1980 population', '1970 population']
@@ -149,7 +193,7 @@ plt.grid(True)
 plt.show()
 
 
-# In[151]:
+# In[70]:
 
 
 # Установка размера графика
@@ -174,7 +218,7 @@ plt.ylabel('Страна')
 plt.show()
 
 
-# In[152]:
+# In[71]:
 
 
 # Установка размера графика
@@ -199,7 +243,7 @@ plt.ylabel('Страна')
 plt.show()
 
 
-# In[153]:
+# In[72]:
 
 
 # Группировка данных по континентам и суммирование населения для 2023 года
@@ -220,7 +264,7 @@ plt.title('Распределение населения по континент
 plt.show()
 
 
-# In[154]:
+# In[73]:
 
 
 # Выбираем первые 10 стран
@@ -250,7 +294,7 @@ plt.xticks(rotation=45)  # Поворот названий годов для л�
 plt.show()
 
 
-# In[155]:
+# In[74]:
 
 
 # Создаем DataFrame down_Population
@@ -269,7 +313,7 @@ down_Population = down_Population[down_Population['down_Population'] <= 0]
 down_Population.head(1000000)
 
 
-# In[156]:
+# In[75]:
 
 
 # Создаем DataFrame down_Population
@@ -317,7 +361,7 @@ for country in down_Population['country'].unique():
     plt.show()
 
 
-# In[157]:
+# In[76]:
 
 
 # Сортировка по убыванию density (km²)
@@ -352,7 +396,7 @@ for bar in bars_bottom:
 plt.show()
 
 
-# In[158]:
+# In[77]:
 
 
 continent_metriks = world_population_data.copy(deep=True)
@@ -370,7 +414,7 @@ pivot_table = pivot_table.sort_values(by='2023 population', ascending=True)
 pivot_table.head(1000000)
 
 
-# In[159]:
+# In[78]:
 
 
 # Сортируем DataFrame по каждому столбцу
@@ -427,7 +471,7 @@ plt.tight_layout()
 plt.show()
 
 
-# In[160]:
+# In[79]:
 
 
 fig = px.choropleth(
@@ -443,7 +487,7 @@ fig = px.choropleth(
 )
 
 # Увеличение размера карты
-fig.update_layout(width=2000, height=1000)
+fig.update_layout(width=1000, height=500)
 
 # Отображение карты
 fig.show()

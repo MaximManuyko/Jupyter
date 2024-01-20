@@ -34,17 +34,21 @@
 # 
 # **WorldHappiness2022**      -  Индекс счастья
 
-# In[20]:
+# In[1012]:
 
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 import seaborn as sns
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from scipy.stats import linregress
+from sklearn.model_selection import train_test_split
 import os
 
 
-# In[2]:
+# In[843]:
 
 
 #Переменные
@@ -56,24 +60,328 @@ a = 1000000
 b = 20
 
 
-# In[3]:
+# In[844]:
+# Получаем путь к текущей директории, где находится Python-скрипт
+current_directory = os.path.dirname(os.path.realpath(__file__))
 
-# Определение текущей директории, где находится файл с кодом
-current_directory = os.path.dirname(os.path.abspath(__file__))
+# Укажите имя файла
+csv_filename = "2_Лучшая_страна_для_жизни_в_2024 году.csv"
 
-# Формирование абсолютного пути к файлу CSV в текущей директории
-csv_file_path = os.path.join(current_directory, '2_Лучшая_страна_для_жизни_в_2024 году.csv')
+# Соберите полный путь к файлу CSV
+csv_path = os.path.join(current_directory, csv_filename)
 
-# Загрузка CSV-файла в датафрейм
-input_raw = pd.read_csv(csv_file_path)
-
-# In[4]:
-
-
-print(input_raw.dtypes)
+# Загрузите данные из CSV файла в DataFrame
+input_raw = pd.read_csv(csv_path)
 
 
-# In[5]:
+# In[1015]:
+
+
+#input_raw.dtypes
+
+
+# In[1016]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Создаем подмножество DataFrame с нужными столбцами
+selected_columns = ['population_2024', 'population_growthRate', 'land_area',
+                    'population_density', 'population_densityMi', 'Hdi2021', 'Hdi2020', 'WorldHappiness2022']
+
+subset_df = input_raw_copy[selected_columns]
+
+# Создаем тепловую карту корреляции
+correlation_matrix = subset_df.corr()
+
+# Настраиваем размер фигуры
+plt.figure(figsize=(b * 0.5, b * 0.3))
+
+# Рисуем тепловую карту с использованием seaborn
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+
+# Настраиваем заголовок
+plt.title('Тепловая карта корреляции')
+
+# Показываем график
+plt.show()
+
+
+# **Вывод:**  
+# **Есть небольшая зависимость популяции населения от площади страны.**    
+# **Чем выше уровень человеческого развития, тем выше индекс счастья**  
+# <span style="font-weight:bold; color:red;">Рост популяции зависит обратно от индекса развития и индекса счастья, чем ниже индекс развития и индекс счастья, тем выше рост популяции.</span>
+
+# In[1017]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+plt.figure(figsize=(b, b * 0.3))
+
+# Построение точечного графика
+plt.scatter(input_raw_copy['population_2024'], range(len(input_raw_copy)))
+
+# Добавление сетки
+plt.grid(True)
+
+# Настройка оси x с шагом 1,000,000,000
+plt.xticks(range(0, int(max(input_raw_copy['population_2024'])) + 1, 100000000))
+
+# Наименование осей и графика на русском языке
+plt.xlabel('Население в 2024 году, млрд. чел.')
+plt.ylabel('Ранг страны')
+plt.title('Распределение населения в 2024 году')
+
+# Отображение графика
+plt.show()
+
+
+# **В большинстве стран население меньше 100 млн. чел.** 
+
+# In[1018]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+fig, ax = plt.subplots(figsize=(b, b * 0.3))
+
+# Сортировка
+input_raw_copy = input_raw_copy.sort_values(by='population_growthRate')
+
+# Создадим точечный график
+ax.scatter(input_raw_copy['population_growthRate'], range(len(input_raw_copy)))
+
+# Настроим оси и сетку
+ax.set_xlabel('Темп роста населения')
+ax.set_ylabel('Ранг страны')
+ax.grid(True)
+
+# Добавим название графика
+ax.set_title('График темпа роста населения по странам')
+
+# Отобразим график
+plt.show()
+
+
+# **В большинстве стран население растёт**
+
+# In[1019]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Создаем фигуру и оси
+fig, ax = plt.subplots(figsize=(b, b *0.3))
+
+# Сортировка
+input_raw_copy = input_raw_copy.sort_values(by='population_density')
+
+# Строим точечный график
+ax.scatter(input_raw_copy['population_density'], range(len(input_raw_copy)))
+
+# Добавляем сетку
+ax.grid(True)
+
+# Устанавливаем подписи осей на русском языке
+ax.set_xlabel('Плотность населения, чел. на кв. км.')
+ax.set_ylabel('Ранг страны')
+
+# Устанавливаем название графика
+ax.set_title('График распределения плотности населения по странам')
+
+# Устанавливаем размер графика
+plt.gcf().subplots_adjust(bottom=0.2)
+
+# Отображаем график
+plt.show()
+
+
+# **Плотность населения в большинстве стран меньше 450 человек на кв. км.**
+
+# In[1020]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Создание точечного графика
+plt.figure(figsize=(b, b * 0.3))  # Установка размера графика
+
+# Сортировка
+input_raw_copy = input_raw_copy.sort_values(by='Hdi2021')
+
+# Построение точечного графика
+plt.scatter(input_raw_copy['Hdi2021'], range(len(input_raw_copy)), color='blue', marker='o', alpha=0.7)
+
+# Добавление сетки
+plt.grid(True, linestyle='--', alpha=0.5)
+
+# Настройка осей и подписей
+plt.xlabel('Индекс человеческого развития 2021 (HDI 2021)', fontsize=12)
+plt.ylabel('Ранг страны', fontsize=12)
+plt.title('Распределение индекса человеческого развития 2021', fontsize=14)
+
+# Показать график
+plt.show()
+
+
+# **Индекс человечечкого развития распределён равномерно по странам**
+
+# In[1021]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Сортировка
+input_raw_copy = input_raw_copy.sort_values(by='WorldHappiness2022')
+
+# Создание точечного графика
+plt.figure(figsize=(b, b * 0.3))  # Размер графика (b, b * 0.3)
+plt.scatter(input_raw_copy['WorldHappiness2022'], range(len(input_raw_copy)), color='blue', marker='o', alpha=0.7)
+
+# Настройка осей и сетки
+plt.xlabel('Уровень счастья в 2022 году')
+plt.ylabel('Ранг страны')
+plt.title('Распределение WorldHappiness2022')
+plt.grid(True)
+
+# Отображение графика
+plt.show()
+
+
+# **Уровень счастья распределён равномерно по странам**
+
+# In[1022]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Установка стиля seaborn для красивого оформления графиков
+sns.set(style="whitegrid")
+
+input_raw_copy = input_raw.copy(deep=True)
+
+# Размер графика
+plt.figure(figsize=(b, b * 0.3))  # Поменяли местами размеры
+
+# Построение точечного графика с линией регрессии
+sns.regplot(data=input_raw_copy, y='population_2024', x='land_area', scatter_kws={'alpha': 0.7})  # Поменяли местами x и y
+
+# Настройка подписей осей и заголовка
+plt.title("Распределение населения и площади стран", fontsize=16)
+plt.xlabel("Площадь страны", fontsize=12)  # Поменяли подпись оси x
+plt.ylabel("Население в 2024 году", fontsize=12)  # Поменяли подпись оси y
+
+# Добавление сетки
+plt.grid(True)
+
+# Отображение графика
+plt.show()
+
+
+# **В целом зависимость чем больше площадь страны, тем больше население**
+
+# In[1023]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Создаем точечный график
+plt.figure(figsize=(b, b *0.3))  # Размер графика (b, b * 0.3)
+
+# Отображаем точки
+sns.scatterplot(x='population_2024', y='population_growthRate', data=input_raw_copy)
+
+# Добавляем сетку
+plt.grid(True)
+
+# Добавляем подписи на русском языке
+plt.xlabel('Население в 2024 году')
+plt.ylabel('Темп роста населения')
+
+# Добавляем линии регрессии
+X = input_raw_copy['population_2024'].values.reshape(-1, 1)
+y = input_raw_copy['population_growthRate'].values
+
+regressor = LinearRegression()
+regressor.fit(X, y)
+y_pred = regressor.predict(X)
+
+plt.plot(X, y_pred, color='red', linewidth=2)  # Линия регрессии
+
+# Добавляем название графика
+plt.title('График зависимости темпа роста населения от населения в 2024 году')
+
+# Отображаем график
+plt.show()
+
+
+# **Темпы роста населения снижаются**
+
+# In[1024]:
+
+
+# Поменять местами оси x и y в input_raw_copy
+input_raw_copy = input_raw.copy(deep=True)
+
+# Установка стиля seaborn для более красивого вида графиков
+sns.set(style="whitegrid")
+
+# Создание графика
+plt.figure(figsize=(b, b * 0.3))  # Замените b на ваш желаемый размер
+sns.scatterplot(x='Hdi2021', y='population_growthRate', data=input_raw_copy, color='blue', alpha=0.7)
+
+# Добавление линии регрессии
+slope, intercept, r_value, p_value, std_err = linregress(input_raw_copy['Hdi2021'], input_raw_copy['population_growthRate'])
+x_values = np.linspace(input_raw_copy['Hdi2021'].min(), input_raw_copy['Hdi2021'].max(), 100)
+y_values = slope * x_values + intercept
+plt.plot(x_values, y_values, color='red', linestyle='--', label=f'Regression Line (R²={r_value**2:.2f})')
+
+# Добавление подписей
+plt.title('График распределения роста населения от индекса человеческого развития', fontsize=16)
+plt.xlabel('Индекс человеческого развития (Hdi2021)', fontsize=12)
+plt.ylabel('Рост населения', fontsize=12)
+plt.legend()
+
+# Отображение сетки
+plt.grid(True)
+
+# Отображение графика
+plt.show()
+
+
+# **Темпы роста населения меньше в странах где высокий уровень человеческого развития**
+
+# In[1025]:
+
+
+input_raw_copy = input_raw.copy(deep = True)
+
+# Настройки для русских подписей
+plt.rcParams['font.family'] = 'DejaVu Sans'
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.titlesize'] = 16
+
+# Создаем точечный график
+plt.figure(figsize=(b, b * 0.3))
+sns.scatterplot(x='Hdi2021', y='WorldHappiness2022', data=input_raw_copy)
+
+# Добавляем линию регрессии
+sns.regplot(x='Hdi2021', y='WorldHappiness2022', data=input_raw_copy, scatter=False, color='red')
+
+# Добавляем сетку и подписи
+plt.grid(True)
+plt.title('График распределения Hdi2021 и WorldHappiness2022')
+plt.xlabel('Hdi2021 (Индекс человеческого развития)')
+plt.ylabel('Индекс счастья')
+
+# Показываем график
+plt.show()
+
+
+# **Чем выше индекс человекческого развития, тем выше индекс счастья**
+
+# In[1026]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -101,7 +409,7 @@ for bar in bars:
 plt.show()
 
 
-# In[6]:
+# In[1027]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -129,7 +437,7 @@ for bar in bars:
 plt.show()
 
 
-# In[7]:
+# In[1028]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -157,7 +465,7 @@ for bar in bars:
 plt.show()
 
 
-# In[8]:
+# In[1029]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -185,9 +493,9 @@ for bar in bars:
 plt.show()
 
 
-# Страны которые не входят в ООО
+# # Страны которые не входят в ООО
 
-# In[9]:
+# In[1030]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -213,7 +521,7 @@ non_un_members_table = non_un_members[[
 non_un_members_table
 
 
-# In[10]:
+# In[1031]:
 
 
 # Создайте копию датафрейма
@@ -240,7 +548,7 @@ for bar in bars:
 plt.show()
 
 
-# In[11]:
+# In[1032]:
 
 
 # Создайте копию датафрейма
@@ -267,7 +575,7 @@ for bar in bars:
 plt.show()
 
 
-# In[12]:
+# In[1033]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -296,7 +604,7 @@ for bar in bars:
 plt.show()
 
 
-# In[13]:
+# In[1034]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -324,7 +632,7 @@ for bar in bars:
 plt.show()
 
 
-# In[14]:
+# In[1035]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -350,7 +658,7 @@ for bar, value in zip(bars, top_countries['Hdi2021']):
 plt.show()
 
 
-# In[15]:
+# In[1036]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -375,7 +683,7 @@ for bar, value in zip(bars, top_countries['Hdi2021']):
 plt.show()
 
 
-# In[16]:
+# In[1037]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -404,7 +712,7 @@ for bar in bars:
 plt.show()
 
 
-# In[17]:
+# In[1038]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
@@ -433,40 +741,7 @@ for bar in bars:
 plt.show()
 
 
-# In[22]:
-
-
-input_raw_copy = input_raw.copy(deep = True)
-
-# Создаем подмножество DataFrame с нужными столбцами
-selected_columns = ['population_2024', 'population_growthRate', 'land_area',
-                    'population_density', 'population_densityMi', 'Hdi2021', 'Hdi2020', 'WorldHappiness2022']
-
-subset_df = input_raw_copy[selected_columns]
-
-# Создаем тепловую карту корреляции
-correlation_matrix = subset_df.corr()
-
-# Настраиваем размер фигуры
-plt.figure(figsize=(b, b))
-
-# Рисуем тепловую карту с использованием seaborn
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
-
-# Настраиваем заголовок
-plt.title('Тепловая карта корреляции')
-
-# Показываем график
-plt.show()
-
-
-# Вывод: 
-# 
-# Есть небольшая зависимость популяции населения от площади страны.
-# 
-# <span style="color:red">Рост популяции зависит обратно от индекса развития и индекса счастья, чем ниже индекс развития и индекс счастья, тем выше рост популяции.</span>
-
-# In[18]:
+# In[1039]:
 
 
 input_raw_copy = input_raw.copy(deep = True)
